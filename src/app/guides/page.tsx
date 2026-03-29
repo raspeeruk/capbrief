@@ -13,6 +13,20 @@ export const metadata: Metadata = {
 
 const guides = [
   {
+    href: '/guides/cap-table-explained',
+    category: 'Cap Tables',
+    title: 'Cap Table Explained',
+    description: 'What a cap table is, what goes in it, and why it is the most important document in your company that most founders understand least.',
+    readTime: '7 min',
+  },
+  {
+    href: '/guides/how-to-build-a-cap-table',
+    category: 'Cap Tables',
+    title: 'How to Build a Cap Table from Scratch',
+    description: 'A 7-step process for building a cap table from incorporation — what to record, how to structure it, and how to keep it accurate as your company grows.',
+    readTime: '8 min',
+  },
+  {
     href: '/guides/cap-table-template',
     category: 'Cap Tables',
     title: 'Cap Table Template: What to Include',
@@ -27,6 +41,13 @@ const guides = [
     readTime: '7 min',
   },
   {
+    href: '/guides/startup-dilution-guide',
+    category: 'Dilution',
+    title: 'Startup Dilution Guide',
+    description: 'How funding rounds shrink founder ownership — with a worked example from incorporation to Series A, plus the three things that accelerate dilution faster than you expect.',
+    readTime: '9 min',
+  },
+  {
     href: '/guides/equity-dilution-calculator',
     category: 'Dilution',
     title: 'Equity Dilution Calculator: How Dilution Works',
@@ -34,10 +55,17 @@ const guides = [
     readTime: '9 min',
   },
   {
+    href: '/guides/safe-note-vs-convertible-note',
+    category: 'Funding Instruments',
+    title: 'SAFE Note vs Convertible Note',
+    description: 'Both convert into equity at your next priced round — but the legal structure, SEIS/EIS implications, and investor rights are different. Here is how to choose.',
+    readTime: '8 min',
+  },
+  {
     href: '/guides/pre-money-vs-post-money-valuation',
     category: 'Valuation',
     title: 'Pre-Money vs Post-Money Valuation',
-    description: 'A $1M raise at "$4M pre" gives investors 20%. The same raise at "$4M post" gives them 25%. That ambiguity is rarely accidental — here is how to protect yourself.',
+    description: 'A £1M raise at "£4M pre" gives investors 20%. The same raise at "£4M post" gives them 25%. That ambiguity is rarely accidental — here is how to protect yourself.',
     readTime: '8 min',
   },
   {
@@ -70,7 +98,7 @@ const guides = [
   },
 ]
 
-const categories = ['All', 'Cap Tables', 'Dilution', 'Valuation', 'Fundraising', 'UK Tax Relief', 'Employee Equity', 'Investor Relations']
+const categories = ['All', 'Cap Tables', 'Dilution', 'Funding Instruments', 'Valuation', 'Fundraising', 'UK Tax Relief', 'Employee Equity', 'Investor Relations']
 
 export default function GuidesHubPage() {
   return (

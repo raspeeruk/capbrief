@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { CapChart } from '@/components/chart/cap-chart'
-import type { CapTableDTO, Shareholder, FundingRound, ShareClass } from '@/types/cap'
+import type { CapTableDTO, Shareholder, ShareClass } from '@/types/cap'
 
 const SHARE_CLASS_LABELS: Record<ShareClass, string> = {
   'ordinary': 'Ordinary',
@@ -31,7 +31,9 @@ export default function CapReportPage() {
   const [session, setSession] = useState<CapSession | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-  const [exporting, setExporting] = useState(false)
+  const [exportingPdf, setExportingPdf] = useState(false)
+  const [exportingPptx, setExportingPptx] = useState(false)
+  const [checkingOut, setCheckingOut] = useState(false)
   const [dilutionMode, setDilutionMode] = useState<'ownership' | 'fully-diluted'>('ownership')
   const [editingShareholder, setEditingShareholder] = useState<string | null>(null)
 
@@ -40,8 +42,20 @@ export default function CapReportPage() {
       try {
         const res = await fetch(`/api/cap-session/${sessionId}`)
         if (res.ok) {
-          const data = await res.json()
+          const data = await res.json() as CapSession
           setSession(data)
+
+          // Persist full cap table to sessionStorage for pay-to-download flow
+          if (data.capTable) {
+            try {
+              sessionStorage.setItem(
+                `capbrief_report_${sessionId}`,
+                JSON.stringify(data.capTable)
+              )
+            } catch {
+              // sessionStorage full or unavailable — silent fallback
+            }
+          }
         }
       } catch { /* ignore */ } finally { setLoading(false) }
     }
@@ -83,24 +97,64 @@ export default function CapReportPage() {
 
   const handleExportPdf = async () => {
     if (!capTable) return
-    setExporting(true)
+    setExportingPdf(true)
     try {
       const { generateCapPdf } = await import('@/lib/export/cap-pdf-generator')
       const blob = await generateCapPdf(capTable)
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `${capTable.companyName.replace(/[^a-zA-Z0-9]+/g, '-')}-cap-table.pdf`
-      document.body.appendChild(a)
-      a.click()
-      document.body.removeChild(a)
-      URL.revokeObjectURL(url)
+      triggerDownload(blob, `${capTable.companyName.replace(/[^a-zA-Z0-9]+/g, '-')}-cap-table.pdf`)
     } catch (err) {
       console.error('PDF export failed:', err)
       alert('PDF export failed — check the console for details')
     } finally {
-      setExporting(false)
+      setExportingPdf(false)
     }
+  }
+
+  const handleExportPptx = async () => {
+    if (!capTable) return
+    setExportingPptx(true)
+    try {
+      const { generateCapPptx } = await import('@/lib/export/cap-pptx-generator')
+      const blob = await generateCapPptx(capTable)
+      triggerDownload(blob, `${capTable.companyName.replace(/[^a-zA-Z0-9]+/g, '-')}-cap-table.pptx`)
+    } catch (err) {
+      console.error('PPTX export failed:', err)
+      alert('PPTX export failed — check the console for details')
+    } finally {
+      setExportingPptx(false)
+    }
+  }
+
+  const handleCheckout = async () => {
+    setCheckingOut(true)
+    try {
+      const res = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reportId: sessionId }),
+      })
+      const data = await res.json() as { url?: string; error?: string }
+      if (data.url) {
+        window.location.href = data.url
+      } else {
+        alert(data.error || 'Could not start checkout')
+        setCheckingOut(false)
+      }
+    } catch {
+      alert('Could not connect to payment server')
+      setCheckingOut(false)
+    }
+  }
+
+  function triggerDownload(blob: Blob, filename: string) {
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = filename
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
   }
 
   if (loading) {
@@ -122,8 +176,6 @@ export default function CapReportPage() {
   }
 
   const shareholders = Object.values(capTable.shareholders)
-  const founders = shareholders.filter(s => s.isFounder)
-  const investors = shareholders.filter(s => s.isInvestor)
 
   return (
     <div className="max-w-[1000px] mx-auto">
@@ -146,8 +198,11 @@ export default function CapReportPage() {
           <Button variant="secondary" size="sm" onClick={handleSave} loading={saving}>
             Save
           </Button>
-          <Button size="sm" onClick={handleExportPdf} loading={exporting}>
+          <Button variant="secondary" size="sm" onClick={handleExportPdf} loading={exportingPdf}>
             Export PDF
+          </Button>
+          <Button variant="secondary" size="sm" onClick={handleExportPptx} loading={exportingPptx}>
+            Export PPTX
           </Button>
         </div>
       </div>
@@ -214,7 +269,7 @@ export default function CapReportPage() {
         <CapChart capTable={capTable} mode={dilutionMode} />
       </Card>
 
-      {/* Shareholders table */}
+      {/* Shareholders table — preview (first 3 rows shown, rest blurred) */}
       <Card padding="lg" className="mb-8">
         <h2 className="font-[family-name:var(--font-heading)] text-lg font-[500] tracking-[0.04em] uppercase text-[#1C1917] mb-6">
           Shareholders ({shareholders.length})
@@ -338,14 +393,63 @@ export default function CapReportPage() {
         </Card>
       )}
 
-      {/* Bottom export */}
+      {/* ── PAY-TO-DOWNLOAD SECTION ── */}
+      <div className="mb-8 border border-[#C9A84C]/40 bg-[#FDFAF5]">
+        {/* Header bar */}
+        <div className="bg-[#1C1917] px-6 py-4 flex items-center justify-between">
+          <div>
+            <p className="font-[family-name:var(--font-mono)] text-[10px] tracking-[0.2em] uppercase text-[#C9A84C] mb-0.5">
+              Export Package
+            </p>
+            <h3 className="font-[family-name:var(--font-heading)] text-white font-[500] tracking-[0.04em] uppercase text-lg">
+              Download Full Report
+            </h3>
+          </div>
+          <div className="text-right">
+            <p className="font-[family-name:var(--font-mono)] text-[#C9A84C] text-2xl font-[500]">£19</p>
+            <p className="text-xs text-white/50 font-[300]">one-time</p>
+          </div>
+        </div>
+
+        <div className="px-6 py-5">
+          {/* What's included */}
+          <ul className="space-y-2 mb-6">
+            {[
+              'PDF report — print-ready, Art Deco design, all shareholders',
+              'PowerPoint deck — 5 slides: cover, ownership, dilution, rounds, AI insights',
+              'Instant download — no account required',
+            ].map(item => (
+              <li key={item} className="flex items-center gap-2 text-sm text-[#6B5B4E] font-[300]">
+                <span className="w-1.5 h-1.5 bg-[#C9A84C] flex-shrink-0" />
+                {item}
+              </li>
+            ))}
+          </ul>
+
+          <Button
+            onClick={handleCheckout}
+            loading={checkingOut}
+            size="lg"
+            className="w-full"
+          >
+            {checkingOut ? 'Redirecting to Checkout…' : 'Download Full Report (PDF + PPTX) — £19'}
+          </Button>
+
+          <p className="text-center text-xs text-[#6B5B4E] font-[300] mt-3">
+            One-time payment. No account required. Secure checkout via Stripe.
+          </p>
+        </div>
+      </div>
+
+      {/* Bottom export (free individual downloads) */}
       <div className="flex items-center justify-between py-6 border-t border-[#D4C9B8]">
         <p className="text-sm text-[#6B5B4E] font-[300]">
           {shareholders.length} shareholders &nbsp;·&nbsp; {capTable.totalSharesIssued.toLocaleString()} shares
         </p>
         <div className="flex items-center gap-3">
           <Button variant="secondary" onClick={handleSave} loading={saving}>Save draft</Button>
-          <Button onClick={handleExportPdf} loading={exporting}>Export PDF</Button>
+          <Button variant="secondary" onClick={handleExportPdf} loading={exportingPdf}>Export PDF</Button>
+          <Button variant="secondary" onClick={handleExportPptx} loading={exportingPptx}>Export PPTX</Button>
         </div>
       </div>
     </div>

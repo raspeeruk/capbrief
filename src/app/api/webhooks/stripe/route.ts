@@ -3,7 +3,7 @@ import Stripe from 'stripe'
 import { createAdminClient } from '@/lib/supabase/admin'
 
 export async function POST(req: NextRequest) {
-  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder')
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
   const body = await req.text()
   const sig = req.headers.get('stripe-signature')
 
@@ -24,18 +24,25 @@ export async function POST(req: NextRequest) {
   switch (event.type) {
     case 'checkout.session.completed': {
       const session = event.data.object as Stripe.Checkout.Session
-      const userId = session.metadata?.userId
-      if (!userId) break
 
-      await supabase
-        .from('profiles')
-        .update({
-          stripe_customer_id: session.customer as string,
-          stripe_subscription_id: session.subscription as string,
-          subscription_status: 'active',
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', userId)
+      // Subscription checkout: activate user's plan
+      if (session.mode === 'subscription') {
+        const userId = session.metadata?.userId
+        if (!userId) break
+
+        await supabase
+          .from('profiles')
+          .update({
+            stripe_customer_id: session.customer as string,
+            stripe_subscription_id: session.subscription as string,
+            subscription_status: 'active',
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', userId)
+      }
+
+      // One-time payment: nothing to update in DB — report is downloaded client-side
+      // via sessionStorage after redirect. No DB write needed.
       break
     }
 

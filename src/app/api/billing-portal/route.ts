@@ -3,7 +3,7 @@ import Stripe from 'stripe'
 import { createClient } from '@/lib/supabase/server'
 
 export async function POST(req: NextRequest) {
-  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder')
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'No billing account' }, { status: 400 })
   }
 
-  const origin = req.headers.get('origin') || 'https://capbrief.com'
+  const origin = req.headers.get('origin') || 'https://roundbrief.com'
 
   const session = await stripe.billingPortal.sessions.create({
     customer: profile.stripe_customer_id,

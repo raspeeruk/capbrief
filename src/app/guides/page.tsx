@@ -96,9 +96,65 @@ const guides = [
     description: 'How to set up an option pool, structure 4-year vesting with a 1-year cliff, use EMI for maximum tax efficiency, and understand how grants appear on your fully diluted cap table.',
     readTime: '9 min',
   },
+  {
+    href: '/guides/seis-vs-eis-comparison',
+    category: 'UK Tax Relief',
+    title: 'SEIS vs EIS: Complete Comparison',
+    description: 'SEIS gives investors 50% income tax relief. EIS gives 30%. Learn the eligibility rules, investment limits, CGT treatment, and which scheme your startup should use first.',
+    readTime: '10 min',
+  },
+  {
+    href: '/guides/startup-equity-split-calculator',
+    category: 'Founder Equity',
+    title: 'Startup Equity Split Calculator',
+    description: 'How to split equity between co-founders fairly. Covers contribution-based models, vesting schedules, the 50/50 trap, and what happens when a co-founder leaves early.',
+    readTime: '9 min',
+  },
+  {
+    href: '/guides/convertible-note-template-uk',
+    category: 'Funding Instruments',
+    title: 'Convertible Note Template UK',
+    description: 'A complete guide to convertible notes for UK startups. Covers key terms, valuation caps, discounts, interest rates, maturity dates, and how notes convert at your next priced round.',
+    readTime: '10 min',
+  },
+  {
+    href: '/guides/shareholder-agreement-template',
+    category: 'Legal',
+    title: 'Shareholder Agreement Template',
+    description: 'A shareholder agreement protects founders, investors, and the company when things go wrong. Learn the 12 essential clauses every UK startup shareholder agreement needs.',
+    readTime: '11 min',
+  },
+  {
+    href: '/guides/cap-table-for-seed-round',
+    category: 'Cap Tables',
+    title: 'Cap Table for Seed Round',
+    description: 'How to set up and manage your cap table for a seed funding round. Covers pre-money valuation, option pool creation, SEIS/EIS share classes, and post-round ownership calculations.',
+    readTime: '10 min',
+  },
+  {
+    href: '/guides/investor-rights-explained',
+    category: 'Investor Relations',
+    title: 'Investor Rights Explained',
+    description: 'Understand the rights investors negotiate: liquidation preferences, anti-dilution, board seats, information rights, pro-rata rights, and how they affect your cap table and exit economics.',
+    readTime: '11 min',
+  },
+  {
+    href: '/guides/drag-along-tag-along-rights',
+    category: 'Legal',
+    title: 'Drag Along & Tag Along Rights',
+    description: 'Drag along rights let majority shareholders force a sale. Tag along rights protect minorities from being left behind. Learn how both work, typical thresholds, and SEIS/EIS implications.',
+    readTime: '10 min',
+  },
+  {
+    href: '/guides/employee-share-scheme-uk',
+    category: 'Employee Equity',
+    title: 'Employee Share Scheme UK',
+    description: 'A complete guide to UK employee share schemes. Covers EMI options, CSOP, growth shares, unapproved options, tax treatment, HMRC reporting, and how each scheme appears on your cap table.',
+    readTime: '11 min',
+  },
 ]
 
-const categories = ['All', 'Cap Tables', 'Dilution', 'Funding Instruments', 'Valuation', 'Fundraising', 'UK Tax Relief', 'Employee Equity', 'Investor Relations']
+const categories = ['All', 'Cap Tables', 'Dilution', 'Funding Instruments', 'Valuation', 'Fundraising', 'UK Tax Relief', 'Employee Equity', 'Investor Relations', 'Founder Equity', 'Legal']
 
 export default function GuidesHubPage() {
   return (

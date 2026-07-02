@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { NewsletterForm } from '@/components/newsletter-form'
 
 export default function LandingPage() {
   return (
@@ -389,6 +390,19 @@ export default function LandingPage() {
 
       {/* Footer */}
       <footer className="max-w-[1200px] mx-auto px-6 py-10 border-t border-[#D4C9B8]">
+        <div className="mb-10 pb-10 border-b border-[#D4C9B8] grid md:grid-cols-2 gap-6 items-center">
+          <div>
+            <p className="font-[family-name:var(--font-mono)] text-[10px] tracking-[0.2em] uppercase text-[#C9A84C] mb-2">
+              The Brief
+            </p>
+            <p className="text-sm text-[#6B5B4E] font-[300] tracking-wide">
+              Occasional notes on cap tables, dilution, and raising well. No noise.
+            </p>
+          </div>
+          <div className="max-w-[420px] md:justify-self-end w-full">
+            <NewsletterForm />
+          </div>
+        </div>
         <div className="flex items-center justify-between">
           <span className="font-[family-name:var(--font-heading)] text-base tracking-[0.1em] uppercase text-[#6B5B4E]">CapBrief</span>
           <div className="flex items-center gap-6 text-sm text-[#6B5B4E] font-[300] tracking-wide">

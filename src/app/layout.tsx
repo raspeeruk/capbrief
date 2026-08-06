@@ -1,3 +1,4 @@
+import ConsentScript from "next/script";
 import type { Metadata } from 'next'
 import { Cinzel, Josefin_Sans, Fira_Mono } from 'next/font/google'
 import './globals.css'
@@ -43,6 +44,15 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${cinzel.variable} ${josefinSans.variable} ${firaMono.variable}`}>
       <head>
+        <ConsentScript
+          id="roger-group-consent"
+          src="https://rogerson-signups.netlify.app/consent-widget.js"
+          strategy="beforeInteractive"
+          data-brand="CapBrief"
+          data-domain="roundbrief.com"
+          data-analytics="true"
+          data-marketing="false"
+        />
         {GA4_ID && (
           <>
             <script async src={`https://www.googletagmanager.com/gtag/js?id=${GA4_ID}`} />

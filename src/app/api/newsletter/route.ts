@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const COLLECTOR_URL = "https://rogerson-signups.netlify.app/";
+const COLLECTOR_URL =
+  "https://rogerson-signups.netlify.app/.netlify/functions/newsletter-subscribe";
 const SITE = "roundbrief.com";
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -45,14 +46,13 @@ export async function POST(req: NextRequest) {
   try {
     const res = await fetch(COLLECTOR_URL, {
       method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({
-        "form-name": "newsletter",
+      headers: { "Content-Type": "application/json", Origin: `https://${SITE}` },
+      body: JSON.stringify({
         email,
-        site: SITE,
+        domain: SITE,
         source,
-        ...(page ? { page } : {}),
-      }).toString(),
+        page: page || `https://${SITE}`,
+      }),
       signal: AbortSignal.timeout(8000),
     });
 

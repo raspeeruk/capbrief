@@ -1,22 +1,24 @@
+import DomainSaleNotice from "@/components/DomainSaleNotice";
+import ConsentScript from "next/script";
 import type { Metadata } from 'next'
-import { Cinzel, Fira_Mono, Josefin_Sans } from 'next/font/google'
+import { Cinzel, Josefin_Sans, Fira_Mono } from 'next/font/google'
 import './globals.css'
 
-const display = Cinzel({
+const cinzel = Cinzel({
   subsets: ['latin'],
-  variable: '--font-display',
+  variable: '--font-heading',
   display: 'swap',
   weight: ['400', '500', '700'],
 })
 
-const body = Josefin_Sans({
+const josefinSans = Josefin_Sans({
   subsets: ['latin'],
   variable: '--font-body',
   display: 'swap',
   weight: ['300', '400', '600'],
 })
 
-const mono = Fira_Mono({
+const firaMono = Fira_Mono({
   subsets: ['latin'],
   variable: '--font-mono',
   display: 'swap',
@@ -24,26 +26,49 @@ const mono = Fira_Mono({
 })
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://roundbrief.com'),
-  title: 'RoundBrief.com — Domain available for acquisition',
-  description:
-    'RoundBrief.com is available for acquisition: a concise .com for board papers, executive summaries and meeting intelligence.',
-  alternates: { canonical: '/' },
-  robots: { index: true, follow: true },
+  title: 'CapBrief — Cap Table to Investor-Ready Equity Reports',
+  description: 'Upload a messy cap table CSV. AI infers missing data and calculates dilution. Get an investor-ready PDF report in minutes.',
   openGraph: {
-    title: 'RoundBrief.com — Domain available for acquisition',
-    description:
-      'A polished .com for board papers, funding updates, executive summaries and meeting intelligence.',
-    url: '/',
-    siteName: 'RoundBrief.com',
+    title: 'CapBrief — Cap Table to Investor-Ready Equity Reports',
+    description: 'Upload a messy cap table CSV. AI infers missing data and calculates dilution. Get an investor-ready PDF report in minutes.',
     type: 'website',
   },
 }
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+const GA4_ID = process.env.NEXT_PUBLIC_GA4_ID
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
   return (
-    <html lang="en" className={`${display.variable} ${body.variable} ${mono.variable}`}>
-      <body>{children}</body>
+    <html lang="en" className={`${cinzel.variable} ${josefinSans.variable} ${firaMono.variable}`}>
+      <head>
+        <script
+          id="roger-group-consent-default"
+          dangerouslySetInnerHTML={{ __html: "window.dataLayer=window.dataLayer||[];window.gtag=window.gtag||function(){window.dataLayer.push(arguments)};window.gtag('consent','default',{analytics_storage:'denied',ad_storage:'denied',ad_user_data:'denied',ad_personalization:'denied',functionality_storage:'denied',personalization_storage:'denied',security_storage:'granted',wait_for_update:500});" }}
+        />
+        <ConsentScript
+          id="roger-group-consent"
+          src="https://rogerson-signups.netlify.app/consent-widget.js"
+          strategy="beforeInteractive"
+          data-brand="CapBrief"
+          data-domain="roundbrief.com"
+          data-analytics="true"
+          data-marketing="false"
+        />
+        {GA4_ID && (
+          <>
+            <script async src={`https://www.googletagmanager.com/gtag/js?id=${GA4_ID}`} />
+            <script dangerouslySetInnerHTML={{ __html: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','${GA4_ID}');` }} />
+          </>
+        )}
+      </head>
+      <body className="min-h-screen bg-[var(--color-bg)] text-[var(--color-ink)] antialiased">
+        {children}
+        <DomainSaleNotice domain="roundbrief.com" />
+      </body>
     </html>
   )
 }
